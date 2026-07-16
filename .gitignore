@@ -1,0 +1,5 @@
+node_modules/
+dist/app.css
+dist/tango-trainer.html
+.DS_Store
+*.log

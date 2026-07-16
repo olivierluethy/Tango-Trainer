@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tango Trainer — learn the Sun &amp; Moon puzzle</title>
+  <meta name="description" content="A teach-first trainer for the LinkedIn Tango logic puzzle. Every mistake is shown, named, and explained." />
+
+  <!-- Preload the two faces used above the fold -->
+  <link rel="preload" href="vendor/fonts/fraunces-900.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="vendor/fonts/plex-sans-400.woff2" as="font" type="font/woff2" crossorigin />
+
+  <link rel="stylesheet" href="dist/app.css" />
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ===================== Header / command bar ===================== -->
+  <header class="border-b border-line bg-surface/40 backdrop-blur-sm">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center gap-4">
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Wordmark: sun + moon glyph paired with the title -->
+        <span class="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-2">
+          <i data-lucide="sun" class="absolute -translate-x-[3px] -translate-y-[2px] text-sun" style="width:18px;height:18px"></i>
+          <i data-lucide="moon" class="absolute translate-x-[5px] translate-y-[4px] text-moon" style="width:14px;height:14px"></i>
+        </span>
+        <div class="hidden sm:block min-w-0">
+          <div class="eyebrow leading-none">Celestial Logic Trainer</div>
+          <h1 class="font-display font-black text-xl leading-tight tracking-tight text-ink whitespace-nowrap">Tango&nbsp;Trainer</h1>
+        </div>
+        <h1 class="sm:hidden font-display font-black text-xl text-ink">Tango</h1>
+      </div>
+
+      <div class="flex-1"></div>
+
+      <!-- Primary command buttons (wired to placeholders this phase) -->
+      <nav class="flex items-center gap-2" aria-label="Main actions">
+        <button id="btn-new" class="btn" type="button">
+          <i data-lucide="plus"></i><span class="hidden sm:inline">New</span>
+        </button>
+        <div class="hidden sm:flex items-center gap-1">
+          <button id="btn-undo" class="btn-icon" type="button" aria-label="Undo" title="Undo (Ctrl+Z)">
+            <i data-lucide="undo-2"></i>
+          </button>
+          <button id="btn-redo" class="btn-icon" type="button" aria-label="Redo" title="Redo (Ctrl+Shift+Z)">
+            <i data-lucide="redo-2"></i>
+          </button>
+          <button id="btn-clear" class="btn-icon" type="button" aria-label="Clear board" title="Clear the cells you filled">
+            <i data-lucide="eraser"></i>
+          </button>
+        </div>
+        <button id="btn-tutorial" class="btn-icon" type="button" aria-label="Tutorial" title="Tutorial &amp; lessons">
+          <i data-lucide="graduation-cap"></i>
+        </button>
+        <button id="btn-hint" class="btn-icon" type="button" aria-label="Hint" title="Hint (H)">
+          <i data-lucide="lightbulb"></i>
+        </button>
+        <button id="btn-rulebook" class="btn-icon" type="button" aria-label="Rulebook" title="Rulebook (R)">
+          <i data-lucide="book-open"></i>
+        </button>
+        <button id="btn-tools" class="btn-icon" type="button" aria-label="Tools" title="Import, solve &amp; cheats">
+          <i data-lucide="wand-2"></i>
+        </button>
+        <button id="btn-settings" class="btn-icon" type="button" aria-label="Settings" title="Settings">
+          <i data-lucide="settings"></i>
+        </button>
+        <button id="btn-help" class="btn-primary btn" type="button" title="Explain the current board (H)">
+          <i data-lucide="sparkles"></i><span class="hidden sm:inline">Explain this</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================== Main play area ===================== -->
+  <main class="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-6 py-6">
+    <div id="layout" class="flex flex-col lg:flex-row gap-6 items-start">
+
+      <!-- Board column -->
+      <section id="board-col" class="w-full lg:w-auto lg:shrink-0 flex flex-col items-center gap-4" aria-label="Puzzle board">
+        <div class="w-full flex items-center justify-between gap-3">
+          <label class="flex items-center gap-2">
+            <span class="eyebrow">Board</span>
+            <select id="size-select" class="bg-surface-2 border border-line rounded-md text-xs text-ink px-2 py-1 font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moon" aria-label="Board size">
+              <option value="4">4 × 4</option>
+              <option value="6">6 × 6</option>
+              <option value="8">8 × 8</option>
+              <option value="10">10 × 10</option>
+            </select>
+          </label>
+          <div class="flex items-center gap-3 font-mono text-xs text-ink-muted">
+            <span class="inline-flex items-center gap-1"><i data-lucide="timer" style="width:14px;height:14px"></i><span id="stat-time">0:00</span></span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="mouse-pointer-click" style="width:14px;height:14px"></i><span id="stat-moves">0</span></span>
+            <span class="inline-flex items-center gap-1 text-violation/80"><i data-lucide="triangle-alert" style="width:14px;height:14px"></i><span id="stat-mistakes">0</span></span>
+          </div>
+        </div>
+
+        <!-- Board mounts here in Phase 2. Static preview shown for now. -->
+        <div id="board-mount" class="panel p-3 sm:p-4"></div>
+
+        <div class="w-full flex items-center justify-between text-xs text-ink-faint font-mono">
+          <span id="seed-label">seed: <span class="text-ink-muted">preview</span></span>
+          <button id="btn-mirror" class="btn-icon" type="button" aria-label="Mirror layout" title="Swap board / panel sides">
+            <i data-lucide="flip-horizontal-2"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Explanation panel column -->
+      <section id="panel-col" class="w-full lg:flex-1 min-w-0" aria-label="Explanation panel">
+        <div id="explain-mount" class="panel min-h-[420px] p-6 flex flex-col">
+          <!-- Idle state; the explanation engine (Phase 4) renders here. -->
+          <div class="eyebrow mb-3">Explanation</div>
+          <div class="flex-1 flex flex-col items-center justify-center text-center gap-4 py-8">
+            <span class="inline-flex h-14 w-14 items-center justify-center rounded-full border border-line bg-surface-2 text-moon">
+              <i data-lucide="telescope"></i>
+            </span>
+            <div class="max-w-sm">
+              <h2 class="font-display text-lg text-ink mb-1">Nothing to explain yet</h2>
+              <p class="text-sm text-ink-muted">
+                Make a move and this panel shows <span class="text-ink">what</span> happened,
+                <span class="text-ink">why</span>, and <span class="text-ink">how</span> to fix it —
+                mapped onto the exact cells on the board.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="border-t border-line py-3 text-center text-xs text-ink-faint">
+    <span class="font-mono">Tango Trainer</span> · teach-first · dark only · offline
+  </footer>
+
+  <div id="modal-root"></div>
+  <div id="toast-root" class="fixed inset-x-0 bottom-6 z-[60] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+  <!-- Vendored UMD globals (offline): window.Motion, window.lucide -->
+  <script src="vendor/motion.min.js"></script>
+  <script src="vendor/lucide.min.js"></script>
+  <script type="module" src="src/js/main.js"></script>
+</body>
+</html>
