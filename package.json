@@ -18,7 +18,7 @@
     "@fontsource/fraunces": "^5.0.0",
     "@fontsource/ibm-plex-mono": "^5.0.0",
     "@fontsource/ibm-plex-sans": "^5.0.0",
-    "concurrently": "^9.0.0",
+    "concurrently": "^9.2.5",
     "esbuild": "^0.28.1",
     "lucide": "^0.460.0",
     "motion": "^11.11.0",
